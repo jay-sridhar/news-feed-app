@@ -1,50 +1,128 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!-- SYNC IMPACT REPORT
+  Version Change: [TEMPLATE] → 1.0.0
+  Status: Initial ratification — constitution created from template
+
+  Modified Principles: N/A (first ratification; all sections new)
+
+  Added Sections:
+    - Core Principles (5 principles)
+    - Technology Stack
+    - Development Workflow
+    - Governance
+
+  Removed Sections: N/A
+
+  Templates Requiring Updates:
+    - .specify/templates/plan-template.md       ✅ aligned
+      (Constitution Check section is generic; filled per-feature by /speckit.plan)
+    - .specify/templates/spec-template.md       ✅ aligned
+      (No principle-specific mandatory sections to add)
+    - .specify/templates/tasks-template.md      ✅ aligned
+      (Task phases and structure match principle-driven workflow)
+    - .specify/templates/agent-file-template.md ✅ aligned
+      (Generic placeholder; populated per feature — no changes needed)
+
+  Deferred TODOs: None
+-->
+
+# News Feed App Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Client-Side Only
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All data fetching MUST occur client-side. No custom backend server, serverless functions, or
+API proxy routes are permitted. External data sources are limited to the GNews free API tier
+and Google News RSS feeds. Any feature requiring server-side logic is out of scope unless
+this principle is explicitly amended via the governance procedure below.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: Keeps infrastructure cost at zero, aligns with Vercel free-tier static
+deployment, and eliminates backend maintenance overhead for a read-only news aggregation app.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. TypeScript Everywhere
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+All source files under `src/` MUST use the `.ts` or `.tsx` extension. Plain `.js` files are
+not permitted. TypeScript strict mode MUST be enabled (`"strict": true` in `tsconfig.json`).
+The `any` type MUST NOT be used; prefer `unknown` with type guards or explicit typed
+interfaces when the shape of external data is uncertain.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Type safety prevents entire classes of runtime errors in API response handling
+and component prop drilling — the primary error sources in a client-side data-fetching SPA.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Mobile-First Responsive Design
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+All UI components MUST be designed for mobile viewports first (baseline: 375px width), then
+enhanced for larger screens using Tailwind CSS responsive prefixes (`sm:`, `md:`, `lg:`).
+No feature is considered complete until it renders correctly at 375px. Desktop layouts are
+progressive enhancements only.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: News consumption is predominantly mobile. Mobile-first guarantees the primary
+use case is never degraded by desktop-first assumptions baked in during development.
+
+### IV. React Context for State — No External State Libraries
+
+Application state MUST be managed using React Context and built-in hooks (`useState`,
+`useReducer`, `useEffect`). Introducing external state management libraries (Redux, Zustand,
+Jotai, MobX, Recoil, or equivalents) requires an explicit constitution amendment. Context
+providers MUST be colocated with their consumers and scoped to the minimum necessary subtree
+— no single root-level "mega-provider" for unrelated state domains.
+
+**Rationale**: React Context is sufficient for a read-only, single-user news feed with no
+complex cross-cutting state. Adding an external state library introduces unjustified
+dependency weight and conceptual overhead.
+
+### V. Simplicity and Free-Tier Compliance
+
+Features MUST respect the GNews API free-tier limit (100 requests/day). Paid APIs and usage
+beyond free tiers are prohibited without explicit constitution amendment. YAGNI applies:
+implement only what the current feature spec requires. Complexity MUST be justified in the
+Complexity Tracking table of `plan.md` whenever a simpler alternative was considered and
+rejected.
+
+**Rationale**: The app must remain deployable and operable at zero cost. Over-engineering
+risks exhausting API quotas and complicates what is fundamentally a simple, read-only,
+client-rendered news aggregator.
+
+## Technology Stack
+
+- **Framework**: React 18+ with Vite (SPA — no SSR, no SSG)
+- **Language**: TypeScript (strict mode, all source files)
+- **Styling**: Tailwind CSS (utility-first, mobile-first)
+- **State Management**: React Context + built-in hooks only
+- **Data Sources**: GNews API (free tier) + Google News RSS feeds (client-side fetch)
+- **Deployment**: Vercel free tier (static output from `vite build`)
+- **Authentication**: None — no user accounts, no login or session flows
+- **Testing**: Optional per feature spec; Vitest is the preferred framework if added
+
+## Development Workflow
+
+- Features are developed on branches named `###-feature-name` and merged via pull request.
+- A feature spec (`specs/###-feature-name/spec.md`) MUST exist before implementation begins.
+- Every pull request MUST include a completed Constitution Check in `plan.md`, confirming
+  compliance with all five principles prior to implementation.
+- Vercel preview deployments serve as the primary environment for UI/UX review and approval.
+- Force-pushes to `main` are prohibited. Squash merge is preferred to maintain readable history.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other practices, style guides, and conventions in the
+repository. Where a conflict exists, the constitution takes precedence.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendment Procedure**:
+1. Open a pull request with the proposed edit to `.specify/memory/constitution.md`.
+2. Increment the version number per the versioning policy below.
+3. Update the Sync Impact Report HTML comment at the top of the file.
+4. Propagate any required changes to affected `.specify/templates/` files in the same PR.
+5. Merge only after all template updates are confirmed complete.
+
+**Compliance Review**: All plan reviews MUST verify the Constitution Check section in
+`plan.md` passes before implementation starts. Complexity violations MUST be documented
+in the Complexity Tracking table of `plan.md` with a justification and a description of
+the simpler alternative that was rejected.
+
+**Versioning Policy**:
+- **MAJOR**: Removal or redefinition of an existing principle (backward incompatible change).
+- **MINOR**: New principle or section added; material expansion of existing guidance.
+- **PATCH**: Clarifications, typo fixes, or non-semantic wording refinements.
+
+**Version**: 1.0.0 | **Ratified**: 2026-03-01 | **Last Amended**: 2026-03-01
