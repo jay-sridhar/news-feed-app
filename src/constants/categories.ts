@@ -43,7 +43,7 @@ export function buildCategories(region: UserRegion): Category[] {
     {
       id: 'international',
       label: 'International',
-      feedUrl: `${BASE}/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGxqTjNjd0VnSmxiaTRBUEFCb0FBUAE?hl=en-IN&gl=IN&ceid=IN:en`,
+      feedUrl: `${BASE}/search?q=world+news+OR+geopolitics+OR+United+States+OR+China+OR+Russia+OR+Europe+OR+Middle+East+OR+United+Nations&hl=en-IN&gl=IN&ceid=IN:en`,
       order: 2,
     },
     {

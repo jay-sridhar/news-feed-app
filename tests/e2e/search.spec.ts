@@ -7,7 +7,7 @@
  *   title="Cricket World Cup"      sourceName="Sports Weekly"
  *   title="Budget Analysis"        sourceName="Finance Daily"
  */
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { mockFeed, mockFeedError } from '../helpers/mockRss'
 import type { MockArticle } from '../helpers/mockRss'
 
@@ -17,6 +17,12 @@ const SEARCH_ARTICLES: MockArticle[] = [
   { title: 'Budget Analysis', source: 'Finance Daily', link: 'https://example.com/search-3' },
 ]
 
+/** Opens the search bar by clicking the magnifier icon. */
+async function openSearch(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Search articles' }).click()
+  await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 5_000 })
+}
+
 // ---------------------------------------------------------------------------
 // US1 — Real-Time Keyword Filter
 // ---------------------------------------------------------------------------
@@ -25,8 +31,8 @@ test.describe('US1 — Real-Time Keyword Filter', () => {
   test.beforeEach(async ({ page }) => {
     await mockFeed(page, SEARCH_ARTICLES)
     await page.goto('/')
-    // Wait for articles to load and search bar to appear
-    await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
+    await page.waitForSelector('h2')
+    await openSearch(page)
   })
 
   test('search bar is visible when articles are loaded', async ({ page }) => {
@@ -61,14 +67,8 @@ test.describe('US1 — Real-Time Keyword Filter', () => {
     await expect(page.getByText('React Hooks Deep Dive', { exact: false })).not.toBeVisible()
 
     // Delete one character at a time until empty
-    await input.press('Backspace')
-    await input.press('Backspace')
-    await input.press('Backspace')
-    await input.press('Backspace')
-    await input.press('Backspace')
-    await input.press('Backspace')
-    await input.press('Backspace')
-    // Input is now empty — all articles should be visible
+    for (let i = 0; i < 7; i++) await input.press('Backspace')
+
     await expect(page.getByText('React Hooks Deep Dive', { exact: false })).toBeVisible()
     await expect(page.getByText('Cricket World Cup', { exact: false })).toBeVisible()
     await expect(page.getByText('Budget Analysis', { exact: false })).toBeVisible()
@@ -82,7 +82,6 @@ test.describe('US1 — Real-Time Keyword Filter', () => {
   })
 
   test('search bar is not shown on error screen', async ({ page }) => {
-    // Set up a fresh page with error mock
     const errorPage = page
     await errorPage.unroute('**/api/get**')
     await mockFeedError(errorPage)
@@ -100,7 +99,8 @@ test.describe('US2 — Clear Search', () => {
   test.beforeEach(async ({ page }) => {
     await mockFeed(page, SEARCH_ARTICLES)
     await page.goto('/')
-    await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
+    await page.waitForSelector('h2')
+    await openSearch(page)
   })
 
   test('clear button (×) appears when input contains text', async ({ page }) => {
@@ -131,7 +131,6 @@ test.describe('US2 — Clear Search', () => {
     await input.fill('cricket')
     await expect(page.getByText('React Hooks Deep Dive', { exact: false })).not.toBeVisible()
 
-    // Clear by selecting all and deleting
     await input.selectText()
     await input.press('Backspace')
 
@@ -150,7 +149,8 @@ test.describe('US3 — No Results State', () => {
   test.beforeEach(async ({ page }) => {
     await mockFeed(page, SEARCH_ARTICLES)
     await page.goto('/')
-    await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
+    await page.waitForSelector('h2')
+    await openSearch(page)
   })
 
   test('shows no-results message for an unmatched query', async ({ page }) => {
@@ -164,9 +164,7 @@ test.describe('US3 — No Results State', () => {
 
   test('no blank screen — no-results message replaces article list', async ({ page }) => {
     await page.getByPlaceholder('Search articles…').fill('zzzzzzzzz')
-    // Should not be a blank screen — the message must be present
     await expect(page.getByText(/No articles match/i)).toBeVisible()
-    // No article links visible
     const links = page.getByRole('link')
     await expect(links).toHaveCount(0)
   })
@@ -175,7 +173,6 @@ test.describe('US3 — No Results State', () => {
     await page.getByPlaceholder('Search articles…').fill('zzzzzzzzz')
     await expect(page.getByText(/No articles match/i)).toBeVisible()
 
-    // Edit query to something that matches
     await page.getByPlaceholder('Search articles…').fill('cricket')
     await expect(page.getByText(/No articles match/i)).not.toBeVisible()
     await expect(page.getByText('Cricket World Cup', { exact: false })).toBeVisible()
@@ -209,7 +206,8 @@ test.describe('US4 — Search Resets on Tab Switch', () => {
     })
     await mockFeed(page, SEARCH_ARTICLES)
     await page.goto('/')
-    await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
+    await page.waitForSelector('h2')
+    await openSearch(page)
   })
 
   test('switching tabs clears the search query', async ({ page }) => {
@@ -218,10 +216,8 @@ test.describe('US4 — Search Resets on Tab Switch', () => {
 
     await page.getByRole('button', { name: 'Technology' }).click()
 
-    // Wait for new feed to load and search bar to reappear
-    const searchBar = page.getByPlaceholder('Search articles…')
-    await expect(searchBar).toBeVisible({ timeout: 10_000 })
-    await expect(searchBar).toHaveValue('')
+    // Search bar closes on tab switch; query is cleared
+    await expect(page.getByPlaceholder('Search articles…')).not.toBeVisible()
   })
 
   test('new tab feed is shown unfiltered after tab switch', async ({ page }) => {
@@ -229,8 +225,7 @@ test.describe('US4 — Search Resets on Tab Switch', () => {
 
     await page.getByRole('button', { name: 'Technology' }).click()
 
-    // After switching, all mock articles should be visible (feed is unfiltered)
-    await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
+    // After switching, all mock articles visible (no search active)
     await expect(page.getByText('React Hooks Deep Dive', { exact: false })).toBeVisible()
     await expect(page.getByText('Cricket World Cup', { exact: false })).toBeVisible()
   })
@@ -239,11 +234,10 @@ test.describe('US4 — Search Resets on Tab Switch', () => {
     await page.getByPlaceholder('Search articles…').fill('budget')
 
     await page.getByRole('button', { name: 'Technology' }).click()
-    await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
-
     await page.getByRole('button', { name: 'Top Stories' }).click()
-    const searchBar = page.getByPlaceholder('Search articles…')
-    await expect(searchBar).toBeVisible({ timeout: 10_000 })
-    await expect(searchBar).toHaveValue('')
+
+    // Search is closed and cleared — open it to verify empty
+    await openSearch(page)
+    await expect(page.getByPlaceholder('Search articles…')).toHaveValue('')
   })
 })

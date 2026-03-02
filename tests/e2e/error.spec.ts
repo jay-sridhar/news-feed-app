@@ -20,8 +20,8 @@ test.describe('Error handling', () => {
 
     await page.route('**/api/get**', (route: Route) => {
       callCount++
-      if (callCount <= 2) {
-        // First two calls fail (React Strict Mode double-invokes effects in dev)
+      if (callCount <= 4) {
+        // First four calls fail (Strict Mode doubles each effect; two effects fire on initial load)
         void route.fulfill({ status: 500, body: 'error' })
       } else {
         // Subsequent calls (after retry click): succeed

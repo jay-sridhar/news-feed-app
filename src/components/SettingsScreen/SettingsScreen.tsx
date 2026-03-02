@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { INDIA_STATES } from '../../constants/categories'
+import { FRESHNESS_OPTIONS } from '../../constants/feed'
 import { useCategoryContext } from '../../context/CategoryContext'
 import { useThemeContext } from '../../context/ThemeContext'
 import { useAuthContext } from '../../context/AuthContext'
 import type { CategoryId } from '../../types'
 
 export function SettingsScreen(): JSX.Element {
-  const { categories, enabledCategories, toggleCategory, closeSettings, userRegion, setUserRegion } =
-    useCategoryContext()
+  const {
+    categories, enabledCategories, toggleCategory, closeSettings,
+    userRegion, setUserRegion, freshnessWindow, setFreshnessWindow,
+  } = useCategoryContext()
   const { theme, toggleTheme } = useThemeContext()
   const { user, authLoading, signInWithGoogle, signOut } = useAuthContext()
   const [guardFired, setGuardFired] = useState(false)
@@ -140,6 +143,26 @@ export function SettingsScreen(): JSX.Element {
                 <option key={s.value} value={s.value}>
                   {s.value}
                 </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Feed section */}
+        <p className="mb-3 mt-6 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          Feed
+        </p>
+        <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between px-4 py-3">
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Show articles from</span>
+            <select
+              aria-label="Freshness window"
+              value={freshnessWindow}
+              onChange={(e) => setFreshnessWindow(e.target.value as typeof freshnessWindow)}
+              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+            >
+              {FRESHNESS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </div>

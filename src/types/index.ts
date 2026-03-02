@@ -17,6 +17,8 @@ export type CategoryId =
 
 export type Theme = 'light' | 'dark'
 
+export type FreshnessWindow = '6h' | '12h' | '24h' | '48h' | '7d' | 'all'
+
 export interface UserRegion {
   country: string
   state: string
@@ -60,6 +62,10 @@ export interface CategoryContextValue {
   closeSettings: () => void
   userRegion: UserRegion
   setUserRegion: (region: UserRegion) => void
+  freshnessWindow: FreshnessWindow
+  setFreshnessWindow: (w: FreshnessWindow) => void
+  searchQuery: string
+  setSearchQuery: (q: string) => void
 }
 
 export type ActiveTab = CategoryId | 'bookmarks'
@@ -86,4 +92,5 @@ export interface CloudPreferences {
   enabledCategories: CategoryId[]
   theme: Theme
   userRegion?: UserRegion
+  freshnessWindow?: FreshnessWindow
 }

@@ -1,17 +1,13 @@
-import { FRESHNESS_WINDOW_MS } from '../constants/feed'
-
-export { FRESHNESS_WINDOW_MS }
-
 /**
- * Returns true if the article should be shown in the feed.
- * - Missing or blank pubDate → always show (unknown age)
- * - Unparseable pubDate → always show (graceful fallback)
- * - Age <= FRESHNESS_WINDOW_MS (24 h) → show
- * - Age > FRESHNESS_WINDOW_MS → hide
+ * Returns true if the article should be shown given the freshness window.
+ * - windowMs null → 'all time', always show
+ * - Missing/blank/unparseable pubDate → always show (graceful fallback)
+ * - Age <= windowMs → show
  */
-export function isRecent(pubDate: string): boolean {
+export function isRecent(pubDate: string, windowMs: number | null): boolean {
+  if (windowMs === null) return true
   if (!pubDate || pubDate.trim() === '') return true
   const date = new Date(pubDate)
   if (isNaN(date.getTime())) return true
-  return Date.now() - date.getTime() <= FRESHNESS_WINDOW_MS
+  return Date.now() - date.getTime() <= windowMs
 }

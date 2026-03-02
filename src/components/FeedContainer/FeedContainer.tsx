@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useCategoryContext } from '../../context/CategoryContext'
 import { useFeed } from '../../hooks/useFeed'
 import type { CategoryId } from '../../types'
@@ -6,27 +6,20 @@ import { NewsCard } from '../NewsCard/NewsCard'
 import { LoadingSpinner } from '../LoadingSpinner/LoadingSpinner'
 import { ErrorState } from '../ErrorState/ErrorState'
 import { ScrollSentinel } from '../ScrollSentinel/ScrollSentinel'
-import { SearchBar } from '../SearchBar/SearchBar'
 
 export function FeedContainer(): JSX.Element {
-  const { activeCategory, categories } = useCategoryContext()
-  // safe cast: FeedContainer is only rendered by MainView when activeCategory !== 'bookmarks'
+  const { activeCategory, categories, searchQuery } = useCategoryContext()
+  // safe cast: FeedContainer is only rendered when activeCategory !== 'bookmarks'
   const activeCategoryId = activeCategory as CategoryId
   const category = categories.find((c) => c.id === activeCategoryId) ?? categories[0]
   const { articles, allArticles, status, error, hasMore, loadMore, retry } = useFeed(category)
-  const [query, setQuery] = useState<string>('')
 
   // Scroll to top whenever the user switches category
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [activeCategory])
 
-  // Reset search query whenever the active category changes (US4)
-  useEffect(() => {
-    setQuery('')
-  }, [activeCategory])
-
-  const normalizedQuery = query.trim().toLowerCase()
+  const normalizedQuery = searchQuery.trim().toLowerCase()
   const filteredArticles = normalizedQuery
     ? allArticles.filter(
         (a) =>
@@ -61,12 +54,6 @@ export function FeedContainer(): JSX.Element {
 
   return (
     <div className="pb-4">
-      <SearchBar
-        value={query}
-        onChange={setQuery}
-        onClear={() => setQuery('')}
-      />
-
       {filteredArticles.length > 0 ? (
         <>
           {filteredArticles.map((article) => (
@@ -83,7 +70,7 @@ export function FeedContainer(): JSX.Element {
         </>
       ) : (
         <p className="px-4 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
-          No articles match &ldquo;{query.trim()}&rdquo;
+          No articles match &ldquo;{searchQuery.trim()}&rdquo;
         </p>
       )}
     </div>

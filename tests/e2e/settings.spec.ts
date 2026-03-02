@@ -284,10 +284,10 @@ test.describe('US3 — Settings accessible everywhere', () => {
   test('gear icon is visible while a search query is active', async ({ page }) => {
     await mockFeed(page, makeArticles(5))
     await page.goto('/')
-    // Wait for articles to load so the SearchBar renders
     await page.waitForSelector('h2')
 
-    // Type a search query
+    // Open search and type a query
+    await page.getByRole('button', { name: 'Search articles' }).click()
     await page.getByPlaceholder('Search articles…').fill('Article')
     await expect(page.getByRole('button', { name: 'Open settings' })).toBeVisible()
   })

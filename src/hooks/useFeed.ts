@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Category, FeedStatus, NewsArticle } from '../types'
-import { PAGE_SIZE } from '../constants/feed'
+import { PAGE_SIZE, FRESHNESS_OPTIONS } from '../constants/feed'
 import { fetchFeed } from '../services/rssService'
 import { isRecent } from '../utils/articleAge'
+import { useCategoryContext } from '../context/CategoryContext'
 
 interface UseFeedReturn {
   articles: NewsArticle[]
@@ -16,6 +17,11 @@ interface UseFeedReturn {
 }
 
 export function useFeed(category: Category): UseFeedReturn {
+  const { freshnessWindow } = useCategoryContext()
+  const windowMs = FRESHNESS_OPTIONS.find((o) => o.value === freshnessWindow)?.ms ?? 24 * 60 * 60 * 1000
+  const windowMsRef = useRef(windowMs)
+  windowMsRef.current = windowMs
+
   const [allArticles, setAllArticles] = useState<NewsArticle[]>([])
   const [status, setStatus] = useState<FeedStatus>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -38,7 +44,7 @@ export function useFeed(category: Category): UseFeedReturn {
         const fetched = await fetchFeed(cat, signal)
 
         setAllArticles((prev) => {
-          const recent = fetched.filter((a) => isRecent(a.pubDate))
+          const recent = fetched.filter((a) => isRecent(a.pubDate, windowMsRef.current))
           if (!isRefresh) return recent
 
           // Prepend new articles that aren't already in the list
@@ -74,6 +80,13 @@ export function useFeed(category: Category): UseFeedReturn {
     void doFetch(controller.signal, false)
     return () => controller.abort()
   }, [category.id, category.feedUrl, doFetch]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-fetch when freshness window changes so the new filter takes effect immediately
+  useEffect(() => {
+    const controller = new AbortController()
+    void doFetch(controller.signal, false)
+    return () => controller.abort()
+  }, [freshnessWindow, doFetch]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-refresh every 10 minutes
   useEffect(() => {

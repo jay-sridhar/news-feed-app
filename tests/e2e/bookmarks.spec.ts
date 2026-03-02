@@ -70,6 +70,7 @@ test.describe('US1 — Bookmark an Article', () => {
     await page.getByLabel('Bookmark article').first().click()
     await expect(page.getByLabel('Remove bookmark').first()).toBeVisible()
 
+    await page.getByRole('button', { name: 'Search articles' }).click()
     await page.getByPlaceholder('Search articles…').fill('Quantum')
     await expect(page.getByText('Quantum Computing Advances', { exact: false })).toBeVisible()
     await expect(page.getByLabel('Remove bookmark')).toBeVisible()

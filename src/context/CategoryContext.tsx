@@ -3,11 +3,13 @@ import type { ReactNode } from 'react'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { firebaseDb } from '../services/firebase'
 import { useAuthContext } from './AuthContext'
-import type { ActiveTab, Category, CategoryContextValue, CategoryId, UserRegion } from '../types'
+import type { ActiveTab, Category, CategoryContextValue, CategoryId, FreshnessWindow, UserRegion } from '../types'
 import { buildCategories, CATEGORY_MAP, DEFAULT_USER_REGION } from '../constants/categories'
+import { DEFAULT_FRESHNESS_WINDOW } from '../constants/feed'
 
 const STORAGE_KEY = 'newsflow_enabled_categories'
 const REGION_STORAGE_KEY = 'newsflow_user_region'
+const FRESHNESS_STORAGE_KEY = 'newsflow_freshness_window'
 
 function loadEnabledCategories(): CategoryId[] {
   try {
@@ -23,6 +25,18 @@ function loadEnabledCategories(): CategoryId[] {
     // ignore parse errors
   }
   return ['top']
+}
+
+const VALID_FRESHNESS: FreshnessWindow[] = ['6h', '12h', '24h', '48h', '7d', 'all']
+
+function loadFreshnessWindow(): FreshnessWindow {
+  try {
+    const stored = localStorage.getItem(FRESHNESS_STORAGE_KEY)
+    if (stored && (VALID_FRESHNESS as string[]).includes(stored)) {
+      return stored as FreshnessWindow
+    }
+  } catch {}
+  return DEFAULT_FRESHNESS_WINDOW
 }
 
 function loadUserRegion(): UserRegion {
@@ -55,8 +69,15 @@ export function CategoryProvider({ children }: { children: ReactNode }): JSX.Ele
   const [enabledCategories, setEnabledCategories] = useState<CategoryId[]>(loadEnabledCategories)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [userRegion, setUserRegionState] = useState<UserRegion>(loadUserRegion)
+  const [freshnessWindow, setFreshnessWindowState] = useState<FreshnessWindow>(loadFreshnessWindow)
+  const [searchQuery, setSearchQueryState] = useState<string>('')
 
   const categories: Category[] = useMemo(() => buildCategories(userRegion), [userRegion])
+
+  // Clear search when the active tab changes
+  useEffect(() => {
+    setSearchQueryState('')
+  }, [activeCategory])
 
   // Keep a stable ref to enabledCategories for use in closeSettings
   const enabledRef = useRef(enabledCategories)
@@ -70,7 +91,7 @@ export function CategoryProvider({ children }: { children: ReactNode }): JSX.Ele
     const prefDocRef = doc(firebaseDb, 'users', uid, 'preferences', 'default')
     void getDoc(prefDocRef).then((snap) => {
       if (!snap.exists()) return
-      const data = snap.data() as { enabledCategories?: CategoryId[]; userRegion?: UserRegion }
+      const data = snap.data() as { enabledCategories?: CategoryId[]; userRegion?: UserRegion; freshnessWindow?: FreshnessWindow }
 
       if (Array.isArray(data.enabledCategories) && data.enabledCategories.length > 0) {
         const valid = data.enabledCategories.filter(
@@ -89,6 +110,11 @@ export function CategoryProvider({ children }: { children: ReactNode }): JSX.Ele
       ) {
         setUserRegionState(data.userRegion)
         localStorage.setItem(REGION_STORAGE_KEY, JSON.stringify(data.userRegion))
+      }
+
+      if (data.freshnessWindow && (VALID_FRESHNESS as string[]).includes(data.freshnessWindow)) {
+        setFreshnessWindowState(data.freshnessWindow)
+        localStorage.setItem(FRESHNESS_STORAGE_KEY, data.freshnessWindow)
       }
     })
   }, [user?.uid]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -122,6 +148,18 @@ export function CategoryProvider({ children }: { children: ReactNode }): JSX.Ele
     [user?.uid]
   )
 
+  const setFreshnessWindow = useCallback(
+    (w: FreshnessWindow): void => {
+      setFreshnessWindowState(w)
+      localStorage.setItem(FRESHNESS_STORAGE_KEY, w)
+      if (user?.uid && firebaseDb) {
+        const writeRef = doc(firebaseDb, 'users', user.uid, 'preferences', 'default')
+        void setDoc(writeRef, { freshnessWindow: w }, { merge: true })
+      }
+    },
+    [user?.uid]
+  )
+
   const openSettings = useCallback((): void => {
     setIsSettingsOpen(true)
   }, [])
@@ -150,6 +188,10 @@ export function CategoryProvider({ children }: { children: ReactNode }): JSX.Ele
         closeSettings,
         userRegion,
         setUserRegion,
+        freshnessWindow,
+        setFreshnessWindow,
+        searchQuery,
+        setSearchQuery: setSearchQueryState,
       }}
     >
       {children}
