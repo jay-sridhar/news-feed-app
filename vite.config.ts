@@ -13,10 +13,10 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/allorigins': {
+      '/api': {
         target: 'https://api.allorigins.win',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/allorigins/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

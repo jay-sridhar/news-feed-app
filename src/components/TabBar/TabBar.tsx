@@ -10,7 +10,10 @@ export function TabBar(): JSX.Element {
     >
       {/* App name row */}
       <div className="flex items-center justify-between px-4 pt-3 pb-0">
-        <h1 className="text-lg font-bold text-gray-900 tracking-tight dark:text-gray-100">NewsFlow</h1>
+        <div>
+          <h1 className="text-lg font-bold text-gray-900 tracking-tight dark:text-gray-100">NewsFlow</h1>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-none">by Jay Sridhar</p>
+        </div>
         <button
           aria-label="Open settings"
           onClick={openSettings}

@@ -28,7 +28,7 @@ async function enableAllCategories(page: Page): Promise<void> {
 
 /** Intercepts allorigins requests and returns category-specific articles based on the URL param. */
 async function mockAllCategories(page: Page): Promise<void> {
-  await page.route('**/allorigins/get**', (route: Route) => {
+  await page.route('**/api/get**', (route: Route) => {
     const url = new URL(route.request().url())
     const encodedFeedUrl = url.searchParams.get('url') ?? ''
     const feedUrl = decodeURIComponent(encodedFeedUrl)

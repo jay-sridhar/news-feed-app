@@ -18,7 +18,7 @@ test.describe('Error handling', () => {
   test('retry button re-fetches and shows articles on success', async ({ page }) => {
     let callCount = 0
 
-    await page.route('**/allorigins/get**', (route: Route) => {
+    await page.route('**/api/get**', (route: Route) => {
       callCount++
       if (callCount <= 2) {
         // First two calls fail (React Strict Mode double-invokes effects in dev)
@@ -48,7 +48,7 @@ test.describe('Error handling', () => {
   })
 
   test('no blank screen on empty feed response', async ({ page }) => {
-    await page.route('**/allorigins/get**', (route: Route) => {
+    await page.route('**/api/get**', (route: Route) => {
       // Empty items array
       const xml = buildRssXml([])
       void route.fulfill({
@@ -72,7 +72,7 @@ test.describe('Error handling', () => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
 
-    await page.route('**/allorigins/get**', (route: Route) => {
+    await page.route('**/api/get**', (route: Route) => {
       // Article with empty link — rssService renders a <div> not an <a>
       const xml = buildRssXml([
         { title: 'No Link Article', source: 'Test Source', link: '' },
@@ -95,7 +95,7 @@ test.describe('Error handling', () => {
   })
 
   test('card with missing source defaults to "Unknown Source"', async ({ page }) => {
-    await page.route('**/allorigins/get**', (route: Route) => {
+    await page.route('**/api/get**', (route: Route) => {
       // Title without " - Source" suffix, no <source> element
       const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
@@ -131,7 +131,7 @@ test.describe('Error handling', () => {
       )
     })
 
-    await page.route('**/allorigins/get**', async (route: Route) => {
+    await page.route('**/api/get**', async (route: Route) => {
       const url = new URL(route.request().url())
       const feedUrl = decodeURIComponent(url.searchParams.get('url') ?? '')
 

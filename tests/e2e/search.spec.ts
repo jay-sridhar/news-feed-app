@@ -84,7 +84,7 @@ test.describe('US1 — Real-Time Keyword Filter', () => {
   test('search bar is not shown on error screen', async ({ page }) => {
     // Set up a fresh page with error mock
     const errorPage = page
-    await errorPage.unroute('**/allorigins/get**')
+    await errorPage.unroute('**/api/get**')
     await mockFeedError(errorPage)
     await errorPage.goto('/')
     await expect(errorPage.getByText(/unable to load/i)).toBeVisible({ timeout: 10_000 })

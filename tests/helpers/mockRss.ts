@@ -58,7 +58,7 @@ export async function mockFeed(page: Page, articles: MockArticle[]): Promise<voi
   const xml = buildRssXml(articles)
   const body = allOriginsEnvelope(xml)
 
-  await page.route('**/allorigins/get**', (route: Route) => {
+  await page.route('**/api/get**', (route: Route) => {
     void route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -71,7 +71,7 @@ export async function mockFeed(page: Page, articles: MockArticle[]): Promise<voi
  * Intercepts all /allorigins/get* requests and returns a 500 error.
  */
 export async function mockFeedError(page: Page): Promise<void> {
-  await page.route('**/allorigins/get**', (route: Route) => {
+  await page.route('**/api/get**', (route: Route) => {
     void route.fulfill({ status: 500, body: 'Internal Server Error' })
   })
 }
