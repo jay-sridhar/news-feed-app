@@ -3,6 +3,7 @@ import type { CategoryId, FeedStatus, NewsArticle } from '../types'
 import { CATEGORY_MAP } from '../constants/categories'
 import { PAGE_SIZE } from '../constants/feed'
 import { fetchFeed } from '../services/rssService'
+import { isRecent } from '../utils/articleAge'
 
 interface UseFeedReturn {
   articles: NewsArticle[]
@@ -35,11 +36,12 @@ export function useFeed(categoryId: CategoryId): UseFeedReturn {
         const fetched = await fetchFeed(category, signal)
 
         setAllArticles((prev) => {
-          if (!isRefresh) return fetched
+          const recent = fetched.filter((a) => isRecent(a.pubDate))
+          if (!isRefresh) return recent
 
           // Prepend new articles that aren't already in the list
           const existingLinks = new Set(prev.map((a) => a.link))
-          const newItems = fetched.filter((a) => !existingLinks.has(a.link))
+          const newItems = recent.filter((a) => !existingLinks.has(a.link))
           return newItems.length > 0 ? [...newItems, ...prev] : prev
         })
 
