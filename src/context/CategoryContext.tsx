@@ -64,7 +64,6 @@ export function CategoryProvider({ children }: { children: ReactNode }): JSX.Ele
         localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
         // Dual-write to Firestore if signed in
         if (user?.uid && firebaseDb) {
-          const prefDocRef = doc(firebaseDb, 'users', user.uid, 'preferences')
           const writeRef = doc(firebaseDb, 'users', user.uid, 'preferences', 'default')
           void setDoc(writeRef, { enabledCategories: next }, { merge: true })
         }
