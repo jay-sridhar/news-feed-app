@@ -2,8 +2,10 @@
 
 **Feature Branch**: `006-settings-categories`
 **Created**: 2026-03-02
-**Status**: Draft
+**Status**: Implemented — extended by `008-categories-region`
 **Input**: User description: "Settings page with category personalisation — a dedicated Settings screen accessible from the header. Users can select which news categories they want to see. Deselected categories are hidden from the tab bar. At least one category must remain selected. The selection persists across sessions."
+
+> **Note**: Feature 008 expanded the category set from 5 to 9 and changed the default enabled set to `['top']` only. See `specs/008-categories-region/` for those changes. This spec describes the core settings/toggle mechanism which remains unchanged.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -18,7 +20,7 @@ As a reader, I open Settings and choose exactly which news categories I care abo
 **Acceptance Scenarios**:
 
 1. **Given** I am on any screen, **When** I tap the Settings icon in the header, **Then** a Settings screen opens showing all available categories each with a toggle or checkbox.
-2. **Given** the Settings screen is open and all 5 categories are visible, **When** I deselect "Tamil Nadu" and "Sports", **Then** those two tabs disappear from the tab bar immediately after I save or close Settings.
+2. **Given** the Settings screen is open and multiple categories are enabled, **When** I deselect "Regional – Tamil Nadu" and "Sports", **Then** those two tabs disappear from the tab bar immediately after I close Settings.
 3. **Given** only one category is selected, **When** I try to deselect it, **Then** the action is blocked and a message explains at least one category must remain selected.
 4. **Given** I deselect a category and close Settings, **When** I reload the app, **Then** the deselected category is still absent from the tab bar.
 5. **Given** the active tab is a category I then deselect in Settings, **When** I close Settings, **Then** the app automatically switches to another selected category.
@@ -87,13 +89,13 @@ As a reader, I can reach Settings from any screen in the app (feed, search, book
 - **SC-001**: A user can open Settings, deselect a category, and see the tab bar update in under 5 seconds end-to-end.
 - **SC-002**: Category preferences survive a hard reload — 100% of the time the tab bar reflects the user's last saved selection on return.
 - **SC-003**: The "minimum one category" guard prevents an empty tab bar in 100% of attempts to deselect the final category.
-- **SC-004**: All 5 categories are reachable (re-enable) from Settings at any time, with 0 categories permanently hidden.
+- **SC-004**: All categories (9 as of feature 008) are reachable (re-enable) from Settings at any time, with 0 categories permanently hidden.
 - **SC-005**: Settings is reachable from every tab in the app — 0 screens require navigation before accessing Settings.
 
 ## Assumptions
 
-- Category order in Settings and the tab bar follows the fixed app-defined order (Top, Tech, Tamil Nadu, India, Sports) — drag-to-reorder is not in scope.
-- All 5 categories start as enabled by default for new users.
+- Category order in Settings and the tab bar follows the fixed app-defined order — drag-to-reorder is not in scope. (As of 008: Top Stories, National–India, Regional–{State}, Technology, AI, Software & Jobs, Business & Stocks, Weather, Sports.)
+- ~~All 5 categories start as enabled by default for new users.~~ **Updated by 008**: Only "Top Stories" is enabled by default for new users.
 - Category preferences are stored locally (device-level) in this feature; cross-device sync is handled by the Google Sign-in feature (007).
 - The Settings screen replaces the need for a modal — it is a full navigable screen, not a pop-up.
 - The dark mode toggle moves into Settings as well, keeping the header cleaner (the header toggle from 004 may be retired or remain as a shortcut).

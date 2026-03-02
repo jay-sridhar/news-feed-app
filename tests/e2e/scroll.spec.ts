@@ -61,6 +61,13 @@ test.describe('US4 — Infinite Scroll', () => {
   })
 
   test('switching tabs resets displayed count to PAGE_SIZE', async ({ page }) => {
+    // Sports is not enabled by default — enable it for this test
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'newsflow_enabled_categories',
+        JSON.stringify(['top', 'sports'])
+      )
+    })
     await mockFeed(page, makeArticles(15))
     await page.goto('/')
     await expect(page.getByRole('link').first()).toBeVisible({ timeout: 10_000 })

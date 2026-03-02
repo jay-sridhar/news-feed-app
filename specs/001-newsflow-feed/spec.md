@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-newsflow-feed`
 **Created**: 2026-03-01
-**Status**: Draft
+**Status**: Implemented — categories expanded by `008-categories-region`
 **Input**: User description: "Build a mobile-friendly scrollable news feed web app called
 'NewsFlow'. It displays categorized news across 5 tabs: Top Stories, Technology & AI,
 Tamil Nadu / Chennai, National India, and Sports. News is fetched in real-time from Google
@@ -134,8 +134,7 @@ cards load without a button press and the scroll position is maintained.
 
 ### Functional Requirements
 
-- **FR-001**: The app MUST display five named category tabs: "Top Stories", "Technology &
-  AI", "Tamil Nadu / Chennai", "National India", and "Sports".
+- **FR-001**: ~~The app MUST display five named category tabs: "Top Stories", "Technology & AI", "Tamil Nadu / Chennai", "National India", and "Sports".~~ **Superseded by 008**: The app supports 9 configurable category tabs; only "Top Stories" is enabled by default.
 - **FR-002**: Each tab MUST fetch and display news articles from the corresponding Google
   News RSS feed for that category.
 - **FR-003**: Each news card MUST display: headline text, source/publisher name, and
@@ -173,8 +172,7 @@ cards load without a button press and the scroll position is maintained.
   on a standard mobile connection.
 - **SC-002**: Switching between category tabs takes under 1 second to display the first
   articles (from cache or fast fetch).
-- **SC-003**: All five category tabs display topically relevant articles — 100% of cards
-  shown in "Sports" must be sports-related; same for other categories.
+- **SC-003**: All category tabs display topically relevant articles — 100% of cards shown in "Sports" must be sports-related; same for other categories. *(As of 008: applies to all 9 categories.)*
 - **SC-004**: The feed remains current: articles displayed are no older than 10 minutes
   beyond their original publication at the time of the last auto-refresh.
 - **SC-005**: The app is fully usable with one thumb on a 375px-wide screen — no horizontal

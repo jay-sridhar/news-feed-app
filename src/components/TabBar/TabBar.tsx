@@ -1,8 +1,7 @@
-import { CATEGORIES } from '../../constants/categories'
 import { useCategoryContext } from '../../context/CategoryContext'
 
 export function TabBar(): JSX.Element {
-  const { activeCategory, setActiveCategory, enabledCategories, openSettings } = useCategoryContext()
+  const { activeCategory, setActiveCategory, categories, enabledCategories, openSettings } = useCategoryContext()
 
   return (
     <nav
@@ -37,7 +36,7 @@ export function TabBar(): JSX.Element {
 
       {/* Scrollable tab row — only enabled categories */}
       <div className="flex overflow-x-auto scrollbar-none gap-0 px-2 pb-0">
-        {CATEGORIES.filter((cat) => enabledCategories.includes(cat.id)).map((cat) => {
+        {categories.filter((cat) => enabledCategories.includes(cat.id)).map((cat) => {
           const isActive = cat.id === activeCategory
           return (
             <button

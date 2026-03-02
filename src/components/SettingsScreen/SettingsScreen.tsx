@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { CATEGORIES } from '../../constants/categories'
+import { INDIA_STATES } from '../../constants/categories'
 import { useCategoryContext } from '../../context/CategoryContext'
 import { useThemeContext } from '../../context/ThemeContext'
 import { useAuthContext } from '../../context/AuthContext'
 import type { CategoryId } from '../../types'
 
 export function SettingsScreen(): JSX.Element {
-  const { enabledCategories, toggleCategory, closeSettings } = useCategoryContext()
+  const { categories, enabledCategories, toggleCategory, closeSettings, userRegion, setUserRegion } =
+    useCategoryContext()
   const { theme, toggleTheme } = useThemeContext()
   const { user, authLoading, signInWithGoogle, signOut } = useAuthContext()
   const [guardFired, setGuardFired] = useState(false)
@@ -116,15 +117,43 @@ export function SettingsScreen(): JSX.Element {
           )}
         </div>
 
+        {/* Region section */}
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          Region
+        </p>
+        <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+          {/* Country row — fixed to India for now */}
+          <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Country</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">India</span>
+          </div>
+          {/* State row */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">State / Region</span>
+            <select
+              aria-label="Select state"
+              value={userRegion.state}
+              onChange={(e) => setUserRegion({ country: userRegion.country, state: e.target.value })}
+              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+            >
+              {INDIA_STATES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.value}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {/* News Categories section */}
         <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           News Categories
         </p>
         <div className="rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-          {CATEGORIES.map((cat, index) => {
+          {categories.map((cat, index) => {
             const isEnabled = enabledCategories.includes(cat.id)
             const isLastEnabled = isEnabled && enabledCategories.length === 1
-            const isLast = index === CATEGORIES.length - 1
+            const isLast = index === categories.length - 1
 
             return (
               <div

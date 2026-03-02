@@ -1,6 +1,25 @@
-export type CategoryId = 'top' | 'tech' | 'tamilnadu' | 'india' | 'sports'
+export type CategoryId =
+  | 'top'
+  | 'national'
+  | 'regional'
+  | 'tech'
+  | 'ai'
+  | 'softwaredev'
+  | 'business'
+  | 'weather'
+  | 'sports'
+  | 'science'
+  | 'education'
+  | 'showbiz'
+  | 'literature'
+  | 'religion'
 
 export type Theme = 'light' | 'dark'
+
+export interface UserRegion {
+  country: string
+  state: string
+}
 
 export interface Category {
   id: CategoryId
@@ -16,6 +35,8 @@ export interface NewsArticle {
   pubDate: string
   sourceName: string
   categoryId: CategoryId
+  imageUrl?: string
+  imageType?: 'image' | 'video'
 }
 
 export type FeedStatus = 'idle' | 'loading' | 'success' | 'error'
@@ -31,11 +52,14 @@ export interface FeedState {
 export interface CategoryContextValue {
   activeCategory: ActiveTab
   setActiveCategory: (id: ActiveTab) => void
+  categories: Category[]
   enabledCategories: CategoryId[]
   toggleCategory: (id: CategoryId) => void
   isSettingsOpen: boolean
   openSettings: () => void
   closeSettings: () => void
+  userRegion: UserRegion
+  setUserRegion: (region: UserRegion) => void
 }
 
 export type ActiveTab = CategoryId | 'bookmarks'
@@ -61,4 +85,5 @@ export interface AuthContextValue {
 export interface CloudPreferences {
   enabledCategories: CategoryId[]
   theme: Theme
+  userRegion?: UserRegion
 }

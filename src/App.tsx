@@ -7,10 +7,26 @@ import { FeedContainer } from './components/FeedContainer/FeedContainer'
 import { BookmarksContainer } from './components/BookmarksContainer/BookmarksContainer'
 import { SettingsScreen } from './components/SettingsScreen/SettingsScreen'
 
-function MainView(): JSX.Element {
-  const { activeCategory, isSettingsOpen } = useCategoryContext()
-  if (isSettingsOpen) return <SettingsScreen />
+function MainContent(): JSX.Element {
+  const { activeCategory } = useCategoryContext()
   return activeCategory === 'bookmarks' ? <BookmarksContainer /> : <FeedContainer />
+}
+
+function AppContent(): JSX.Element {
+  const { isSettingsOpen } = useCategoryContext()
+
+  if (isSettingsOpen) {
+    return <SettingsScreen />
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
+      <TabBar />
+      <main className="flex-1">
+        <MainContent />
+      </main>
+    </div>
+  )
 }
 
 export default function App(): JSX.Element {
@@ -19,12 +35,7 @@ export default function App(): JSX.Element {
       <ThemeProvider>
         <BookmarkProvider>
           <CategoryProvider>
-            <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
-              <TabBar />
-              <main className="flex-1">
-                <MainView />
-              </main>
-            </div>
+            <AppContent />
           </CategoryProvider>
         </BookmarkProvider>
       </ThemeProvider>

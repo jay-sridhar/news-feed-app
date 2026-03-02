@@ -2,16 +2,28 @@
  * Settings Page with Category Personalisation
  * Tests: US1 — Select categories, US2 — Restore categories, US3 — Settings everywhere + dark mode
  */
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { mockFeed, makeArticles } from '../helpers/mockRss'
 
 // ---------------------------------------------------------------------------
 // Shared helpers
 // ---------------------------------------------------------------------------
 
-async function openSettings(page: Parameters<typeof mockFeed>[0]): Promise<void> {
+const ALL_CATEGORY_IDS = [
+  'top', 'national', 'regional', 'tech', 'ai', 'softwaredev', 'business', 'weather', 'sports',
+  'science', 'education', 'showbiz', 'literature', 'religion',
+]
+
+async function openSettings(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Open settings' }).click()
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
+}
+
+/** Pre-enable all categories so tests can interact with any tab or toggle. */
+async function enableAllCategories(page: Page): Promise<void> {
+  await page.addInitScript((ids: string[]) => {
+    localStorage.setItem('newsflow_enabled_categories', JSON.stringify(ids))
+  }, ALL_CATEGORY_IDS)
 }
 
 // ---------------------------------------------------------------------------
@@ -33,18 +45,53 @@ test.describe('US1 — Select My Categories', () => {
     await expect(page.getByText('News Categories')).toBeVisible()
   })
 
-  test('all 5 category toggles are visible in Settings', async ({ page }) => {
+  test('settings hides the tab bar while open', async ({ page }) => {
+    await mockFeed(page, makeArticles(5))
+    await page.goto('/')
+    await page.waitForSelector('h1')
+
+    // Tab bar is visible before opening settings
+    await expect(page.getByRole('navigation', { name: 'News categories' })).toBeVisible()
+
+    await openSettings(page)
+
+    // Tab bar is hidden when settings is open
+    await expect(page.getByRole('navigation', { name: 'News categories' })).not.toBeVisible()
+
+    await page.getByRole('button', { name: 'Close settings' }).click()
+
+    // Tab bar is restored after closing
+    await expect(page.getByRole('navigation', { name: 'News categories' })).toBeVisible()
+  })
+
+  test('all category toggles are visible in Settings', async ({ page }) => {
     await mockFeed(page, makeArticles(5))
     await page.goto('/')
     await page.waitForSelector('h1')
     await openSettings(page)
 
-    for (const label of ['Top Stories', 'Technology & AI', 'Tamil Nadu / Chennai', 'National India', 'Sports']) {
+    for (const label of [
+      'Top Stories',
+      'National – India',
+      'Regional – Tamil Nadu',
+      'Technology',
+      'Artificial Intelligence',
+      'Software & Jobs',
+      'Business & Stocks',
+      'Weather',
+      'Sports',
+      'Science',
+      'Education',
+      'Media & Show-Biz',
+      'Literature',
+      'Religion',
+    ]) {
       await expect(page.getByRole('switch', { name: label })).toBeVisible()
     }
   })
 
   test('deselecting a category removes its tab from the tab bar', async ({ page }) => {
+    await enableAllCategories(page)
     await mockFeed(page, makeArticles(5))
     await page.goto('/')
     await page.waitForSelector('h1')
@@ -59,17 +106,32 @@ test.describe('US1 — Select My Categories', () => {
     await expect(page.getByRole('button', { name: 'Sports' })).not.toBeVisible()
     // Other tabs still present
     await expect(page.getByRole('button', { name: 'Top Stories' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Technology & AI' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Technology' })).toBeVisible()
   })
 
   test('min-one guard: last enabled toggle stays checked and shows message', async ({ page }) => {
+    await enableAllCategories(page)
     await mockFeed(page, makeArticles(5))
     await page.goto('/')
     await page.waitForSelector('h1')
     await openSettings(page)
 
     // Disable all but one — leave only Top Stories
-    for (const label of ['Technology & AI', 'Tamil Nadu / Chennai', 'National India', 'Sports']) {
+    for (const label of [
+      'National – India',
+      'Regional – Tamil Nadu',
+      'Technology',
+      'Artificial Intelligence',
+      'Software & Jobs',
+      'Business & Stocks',
+      'Weather',
+      'Sports',
+      'Science',
+      'Education',
+      'Media & Show-Biz',
+      'Literature',
+      'Religion',
+    ]) {
       await page.getByRole('switch', { name: label }).click()
     }
 
@@ -83,6 +145,7 @@ test.describe('US1 — Select My Categories', () => {
   })
 
   test('active tab auto-switches when its category is deselected', async ({ page }) => {
+    await enableAllCategories(page)
     await mockFeed(page, makeArticles(5))
     await page.goto('/')
     await page.waitForSelector('h1')
@@ -98,20 +161,28 @@ test.describe('US1 — Select My Categories', () => {
 
     // Sports tab gone
     await expect(page.getByRole('button', { name: 'Sports' })).not.toBeVisible()
-    // Some other tab is now active (not Sports)
-    await expect(page.getByRole('button', { name: 'Sports' })).not.toBeVisible()
     // Feed is shown (not blank)
     await expect(page.locator('main')).toBeVisible()
   })
 
-  test('deselected categories persist after hard reload', async ({ page }) => {
+  test('disabled categories persist after hard reload', async ({ page }) => {
     await mockFeed(page, makeArticles(5))
     await page.goto('/')
     await page.waitForSelector('h1')
 
-    // Deselect Tamil Nadu and Sports
+    // Enable Regional and Sports via Settings UI (they're off by default)
     await openSettings(page)
-    await page.getByRole('switch', { name: 'Tamil Nadu / Chennai' }).click()
+    await page.getByRole('switch', { name: 'Regional – Tamil Nadu' }).click()
+    await page.getByRole('switch', { name: 'Sports' }).click()
+    await page.getByRole('button', { name: 'Close settings' }).click()
+
+    // Both now visible in tab bar
+    await expect(page.getByRole('button', { name: 'Regional – Tamil Nadu' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Sports' })).toBeVisible()
+
+    // Disable them via Settings UI
+    await openSettings(page)
+    await page.getByRole('switch', { name: 'Regional – Tamil Nadu' }).click()
     await page.getByRole('switch', { name: 'Sports' }).click()
     await page.getByRole('button', { name: 'Close settings' }).click()
 
@@ -121,9 +192,9 @@ test.describe('US1 — Select My Categories', () => {
     await page.waitForSelector('h1')
 
     // Both still absent after reload
-    await expect(page.getByRole('button', { name: 'Tamil Nadu / Chennai' })).not.toBeVisible()
+    await expect(page.getByRole('button', { name: 'Regional – Tamil Nadu' })).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Sports' })).not.toBeVisible()
-    // Others still present
+    // Top Stories still present
     await expect(page.getByRole('button', { name: 'Top Stories' })).toBeVisible()
   })
 })
@@ -133,9 +204,12 @@ test.describe('US1 — Select My Categories', () => {
 // ---------------------------------------------------------------------------
 test.describe('US2 — Restore a Category', () => {
   test('a hidden category toggle is unchecked in Settings', async ({ page }) => {
-    // Pre-seed: Sports hidden
+    // Pre-seed: Sports hidden, others enabled
     await page.addInitScript(() =>
-      localStorage.setItem('newsflow_enabled_categories', JSON.stringify(['top', 'tech', 'tamilnadu', 'india']))
+      localStorage.setItem(
+        'newsflow_enabled_categories',
+        JSON.stringify(['top', 'tech', 'regional', 'national'])
+      )
     )
     await mockFeed(page, makeArticles(5))
     await page.goto('/')
@@ -148,7 +222,10 @@ test.describe('US2 — Restore a Category', () => {
   test('re-enabling a hidden category restores its tab', async ({ page }) => {
     // Pre-seed: Sports hidden
     await page.addInitScript(() =>
-      localStorage.setItem('newsflow_enabled_categories', JSON.stringify(['top', 'tech', 'tamilnadu', 'india']))
+      localStorage.setItem(
+        'newsflow_enabled_categories',
+        JSON.stringify(['top', 'tech', 'regional', 'national'])
+      )
     )
     await mockFeed(page, makeArticles(5))
     await page.goto('/')
@@ -167,7 +244,10 @@ test.describe('US2 — Restore a Category', () => {
   test('restored tab loads its feed normally', async ({ page }) => {
     // Pre-seed: Sports hidden
     await page.addInitScript(() =>
-      localStorage.setItem('newsflow_enabled_categories', JSON.stringify(['top', 'tech', 'tamilnadu', 'india']))
+      localStorage.setItem(
+        'newsflow_enabled_categories',
+        JSON.stringify(['top', 'tech', 'regional', 'national'])
+      )
     )
     await mockFeed(page, makeArticles(5))
     await page.goto('/')

@@ -10,20 +10,47 @@ export function NewsCard({ article }: NewsCardProps): JSX.Element {
   const { isBookmarked, toggleBookmark } = useBookmarkContext()
   const saved = isBookmarked(article.id)
 
+  const thumbnail = article.imageUrl ? (
+    <div className="relative flex-shrink-0 w-[90px] h-[68px] my-auto mr-3">
+      <img
+        src={article.imageUrl}
+        alt=""
+        className="w-full h-full object-cover rounded-md"
+        loading="lazy"
+      />
+      {article.imageType === 'video' && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="white"
+            className="w-7 h-7 drop-shadow"
+            aria-label="Video"
+          >
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+      )}
+    </div>
+  ) : null
+
   const content = (
-    <div className="flex flex-col gap-1 px-4 py-4 pr-14 active:bg-gray-50 dark:active:bg-gray-800">
-      <h2 className="text-[15px] font-semibold leading-snug text-gray-900 line-clamp-3 dark:text-gray-100">
-        {article.title}
-      </h2>
-      <div className="flex items-center gap-2 pt-1">
-        <span className="text-xs font-medium text-blue-700 truncate max-w-[55%]">
-          {article.sourceName}
-        </span>
-        <span className="text-gray-300 text-xs dark:text-gray-600">·</span>
-        <span className="text-xs text-gray-400 whitespace-nowrap dark:text-gray-500">
-          {formatRelativeTime(article.pubDate)}
-        </span>
+    <div className="flex items-start gap-1 px-4 py-4 pr-14 active:bg-gray-50 dark:active:bg-gray-800">
+      <div className="flex flex-col gap-1 flex-1 min-w-0">
+        <h2 className="text-[15px] font-semibold leading-snug text-gray-900 line-clamp-3 dark:text-gray-100">
+          {article.title}
+        </h2>
+        <div className="flex items-center gap-2 pt-1">
+          <span className="text-xs font-medium text-blue-700 truncate max-w-[55%]">
+            {article.sourceName}
+          </span>
+          <span className="text-gray-300 text-xs dark:text-gray-600">·</span>
+          <span className="text-xs text-gray-400 whitespace-nowrap dark:text-gray-500">
+            {formatRelativeTime(article.pubDate)}
+          </span>
+        </div>
       </div>
+      {thumbnail}
     </div>
   )
 

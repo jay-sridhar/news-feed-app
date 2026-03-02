@@ -24,14 +24,15 @@ Mirrors the local `BookmarkedArticle` type. One document per bookmarked article 
 
 ### users/{uid}/preferences
 
-Single document. Read once on sign-in; written on every preference change.
+Single document (path: `users/{uid}/preferences/default`). Read once on sign-in; written on every preference change using `{ merge: true }`.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `enabledCategories` | `string[]` | Array of enabled `CategoryId` values |
 | `theme` | `'light' \| 'dark'` | Current theme preference |
+| `userRegion` | `{ country: string; state: string }` | *(Added in 008)* User's geographic region for National/Regional feeds |
 
-**Document path**: `users/{uid}/preferences` (no sub-document ID needed — single document)
+**Document path**: `users/{uid}/preferences/default`
 
 **Merge strategy**: On sign-in, cloud preferences overwrite local values. On change, write to both Firestore and localStorage.
 
@@ -57,20 +58,22 @@ export interface AuthContextValue {
 export interface CloudPreferences {
   enabledCategories: CategoryId[]
   theme: Theme
+  userRegion?: UserRegion  // added in feature 008
 }
 ```
 
 ---
 
-## localStorage Keys (complete list after 007)
+## localStorage Keys (complete list after 008)
 
 | Key | Feature | Type |
 |-----|---------|------|
 | `newsflow_theme` | 004 | `'light' \| 'dark'` |
 | `newsflow_bookmarks` | 003 | `JSON: BookmarkedArticle[]` |
 | `newsflow_enabled_categories` | 006 | `JSON: CategoryId[]` |
+| `newsflow_user_region` | 008 | `JSON: { country: string; state: string }` |
 
-No new localStorage keys. Firebase Auth persists session via IndexedDB automatically (handled by Firebase SDK).
+No new localStorage keys added in feature 007. Firebase Auth persists session via IndexedDB automatically (handled by Firebase SDK).
 
 ---
 

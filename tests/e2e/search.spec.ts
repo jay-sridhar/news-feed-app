@@ -200,6 +200,13 @@ test.describe('US3 — No Results State', () => {
 
 test.describe('US4 — Search Resets on Tab Switch', () => {
   test.beforeEach(async ({ page }) => {
+    // Enable 'tech' tab so tab-switch tests can click it
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'newsflow_enabled_categories',
+        JSON.stringify(['top', 'tech'])
+      )
+    })
     await mockFeed(page, SEARCH_ARTICLES)
     await page.goto('/')
     await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
@@ -209,7 +216,7 @@ test.describe('US4 — Search Resets on Tab Switch', () => {
     await page.getByPlaceholder('Search articles…').fill('cricket')
     await expect(page.getByText('React Hooks Deep Dive', { exact: false })).not.toBeVisible()
 
-    await page.getByRole('button', { name: 'Technology & AI' }).click()
+    await page.getByRole('button', { name: 'Technology' }).click()
 
     // Wait for new feed to load and search bar to reappear
     const searchBar = page.getByPlaceholder('Search articles…')
@@ -220,7 +227,7 @@ test.describe('US4 — Search Resets on Tab Switch', () => {
   test('new tab feed is shown unfiltered after tab switch', async ({ page }) => {
     await page.getByPlaceholder('Search articles…').fill('cricket')
 
-    await page.getByRole('button', { name: 'Technology & AI' }).click()
+    await page.getByRole('button', { name: 'Technology' }).click()
 
     // After switching, all mock articles should be visible (feed is unfiltered)
     await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
@@ -231,7 +238,7 @@ test.describe('US4 — Search Resets on Tab Switch', () => {
   test('switching back to original tab shows empty search', async ({ page }) => {
     await page.getByPlaceholder('Search articles…').fill('budget')
 
-    await page.getByRole('button', { name: 'Technology & AI' }).click()
+    await page.getByRole('button', { name: 'Technology' }).click()
     await expect(page.getByPlaceholder('Search articles…')).toBeVisible({ timeout: 10_000 })
 
     await page.getByRole('button', { name: 'Top Stories' }).click()

@@ -11,11 +11,17 @@ type RssItem = {
     $?: { url?: string }
     _?: string
   }
+  mediaContent?: {
+    $?: { url?: string; medium?: string }
+  }
 }
 
 const parser = new Parser<Record<string, unknown>, RssItem>({
   customFields: {
-    item: [['source', 'source', { keepArray: false }]],
+    item: [
+      ['source', 'source', { keepArray: false }],
+      ['media:content', 'mediaContent', { keepArray: false }],
+    ],
   },
 })
 
@@ -57,7 +63,17 @@ export function parseRssItem(item: RssItem, categoryId: CategoryId): NewsArticle
     ? encodeURIComponent(link).slice(0, 100)
     : `${categoryId}-${pubDate}-${title.slice(0, 20)}`
 
-  return { id, title, link, pubDate, sourceName, categoryId }
+  const mediaUrl = item.mediaContent?.$?.url
+  const mediaMedium = item.mediaContent?.$?.medium
+  const imageUrl = mediaUrl && mediaUrl.length > 0 ? mediaUrl : undefined
+  const imageType: 'image' | 'video' | undefined =
+    imageUrl !== undefined
+      ? mediaMedium === 'video'
+        ? 'video'
+        : 'image'
+      : undefined
+
+  return { id, title, link, pubDate, sourceName, categoryId, imageUrl, imageType }
 }
 
 export async function fetchFeed(

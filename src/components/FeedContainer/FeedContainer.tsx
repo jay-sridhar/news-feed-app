@@ -9,9 +9,11 @@ import { ScrollSentinel } from '../ScrollSentinel/ScrollSentinel'
 import { SearchBar } from '../SearchBar/SearchBar'
 
 export function FeedContainer(): JSX.Element {
-  const { activeCategory } = useCategoryContext()
+  const { activeCategory, categories } = useCategoryContext()
   // safe cast: FeedContainer is only rendered by MainView when activeCategory !== 'bookmarks'
-  const { articles, allArticles, status, error, hasMore, loadMore, retry } = useFeed(activeCategory as CategoryId)
+  const activeCategoryId = activeCategory as CategoryId
+  const category = categories.find((c) => c.id === activeCategoryId) ?? categories[0]
+  const { articles, allArticles, status, error, hasMore, loadMore, retry } = useFeed(category)
   const [query, setQuery] = useState<string>('')
 
   // Scroll to top whenever the user switches category

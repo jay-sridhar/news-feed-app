@@ -123,6 +123,14 @@ test.describe('Error handling', () => {
   })
 
   test('switching tabs during in-flight fetch shows new tab content', async ({ page }) => {
+    // Sports is not enabled by default — enable it so its tab is visible
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'newsflow_enabled_categories',
+        JSON.stringify(['top', 'sports'])
+      )
+    })
+
     await page.route('**/allorigins/get**', async (route: Route) => {
       const url = new URL(route.request().url())
       const feedUrl = decodeURIComponent(url.searchParams.get('url') ?? '')

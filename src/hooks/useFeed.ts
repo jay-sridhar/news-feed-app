@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import type { CategoryId, FeedStatus, NewsArticle } from '../types'
-import { CATEGORY_MAP } from '../constants/categories'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import type { Category, FeedStatus, NewsArticle } from '../types'
 import { PAGE_SIZE } from '../constants/feed'
 import { fetchFeed } from '../services/rssService'
 import { isRecent } from '../utils/articleAge'
@@ -16,24 +15,27 @@ interface UseFeedReturn {
   retry: () => void
 }
 
-export function useFeed(categoryId: CategoryId): UseFeedReturn {
+export function useFeed(category: Category): UseFeedReturn {
   const [allArticles, setAllArticles] = useState<NewsArticle[]>([])
   const [status, setStatus] = useState<FeedStatus>('idle')
   const [error, setError] = useState<string | null>(null)
   const [lastRefreshed, setLastRefreshed] = useState<number | null>(null)
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE)
 
+  // Keep ref up-to-date so doFetch always uses the latest category without being re-created
+  const categoryRef = useRef(category)
+  categoryRef.current = category
+
   const doFetch = useCallback(
     async (signal: AbortSignal, isRefresh = false): Promise<void> => {
-      const category = CATEGORY_MAP[categoryId]
-      if (!category) return
+      const cat = categoryRef.current
 
       if (!isRefresh) {
         setStatus('loading')
       }
 
       try {
-        const fetched = await fetchFeed(category, signal)
+        const fetched = await fetchFeed(cat, signal)
 
         setAllArticles((prev) => {
           const recent = fetched.filter((a) => isRecent(a.pubDate))
@@ -57,10 +59,10 @@ export function useFeed(categoryId: CategoryId): UseFeedReturn {
         // On refresh failure, silently retain existing articles
       }
     },
-    [categoryId]
+    [] // eslint-disable-line react-hooks/exhaustive-deps — reads category via ref
   )
 
-  // Initial fetch — reset state when category changes
+  // Re-fetch whenever the category id or feed URL changes
   useEffect(() => {
     setAllArticles([])
     setStatus('idle')
@@ -71,7 +73,7 @@ export function useFeed(categoryId: CategoryId): UseFeedReturn {
     const controller = new AbortController()
     void doFetch(controller.signal, false)
     return () => controller.abort()
-  }, [categoryId, doFetch])
+  }, [category.id, category.feedUrl, doFetch]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-refresh every 10 minutes
   useEffect(() => {
@@ -88,7 +90,7 @@ export function useFeed(categoryId: CategoryId): UseFeedReturn {
       clearInterval(id)
       controller.current.abort()
     }
-  }, [categoryId, doFetch])
+  }, [category.id, doFetch]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback((): void => {
     setDisplayCount((prev) => Math.min(prev + PAGE_SIZE, allArticles.length))
