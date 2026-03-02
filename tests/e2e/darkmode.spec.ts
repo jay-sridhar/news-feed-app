@@ -8,6 +8,12 @@ async function setupMocks(page: Parameters<typeof mockFeed>[0]) {
   await mockFeed(page, makeArticles(5, 'Article'))
 }
 
+/** Open the Settings screen via the gear icon. */
+async function openSettings(page: Parameters<typeof mockFeed>[0]) {
+  await page.getByRole('button', { name: 'Open settings' }).click()
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
+}
+
 // ---------------------------------------------------------------------------
 // US1 — OS Auto-Detect
 // ---------------------------------------------------------------------------
@@ -58,7 +64,7 @@ test.describe('US1 — OS auto-detect', () => {
 })
 
 // ---------------------------------------------------------------------------
-// US2 — Manual Toggle
+// US2 — Manual Toggle (toggle now lives in Settings > Appearance)
 // ---------------------------------------------------------------------------
 test.describe('US2 — manual theme toggle', () => {
   test('toggle button is visible in the header', async ({ page }) => {
@@ -66,6 +72,8 @@ test.describe('US2 — manual theme toggle', () => {
     await setupMocks(page)
     await page.goto('/')
     await page.waitForSelector('h1')
+    // Toggle is now inside Settings — open Settings to find it
+    await openSettings(page)
     const btn = page.getByRole('button', { name: /switch to (dark|light) mode/i })
     await expect(btn).toBeVisible()
   })
@@ -75,6 +83,7 @@ test.describe('US2 — manual theme toggle', () => {
     await setupMocks(page)
     await page.goto('/')
     await page.waitForSelector('h1')
+    await openSettings(page)
     const btn = page.getByRole('button', { name: 'Switch to dark mode' })
     await expect(btn).toBeVisible()
   })
@@ -85,6 +94,7 @@ test.describe('US2 — manual theme toggle', () => {
     await page.goto('/')
     await page.waitForSelector('h1')
 
+    await openSettings(page)
     await page.getByRole('button', { name: 'Switch to dark mode' }).click()
 
     const hasDark = await page.evaluate(() =>
@@ -99,6 +109,7 @@ test.describe('US2 — manual theme toggle', () => {
     await page.goto('/')
     await page.waitForSelector('h1')
 
+    await openSettings(page)
     await page.getByRole('button', { name: 'Switch to dark mode' }).click()
 
     const btn = page.getByRole('button', { name: 'Switch to light mode' })
@@ -111,6 +122,7 @@ test.describe('US2 — manual theme toggle', () => {
     await page.goto('/')
     await page.waitForSelector('h1')
 
+    await openSettings(page)
     await page.getByRole('button', { name: 'Switch to dark mode' }).click()
     await page.getByRole('button', { name: 'Switch to light mode' }).click()
 
@@ -126,6 +138,7 @@ test.describe('US2 — manual theme toggle', () => {
     await page.goto('/')
     await page.waitForSelector('h1')
 
+    await openSettings(page)
     await page.getByRole('button', { name: 'Switch to dark mode' }).click()
 
     const hasDark = await page.evaluate(() =>
@@ -140,6 +153,7 @@ test.describe('US2 — manual theme toggle', () => {
     await page.goto('/')
     await page.waitForSelector('h1')
 
+    await openSettings(page)
     await page.getByRole('button', { name: 'Switch to dark mode' }).click()
 
     const stored = await page.evaluate(() => localStorage.getItem('newsflow_theme'))
@@ -168,6 +182,7 @@ test.describe('US3 — persistent preference', () => {
     await page.goto('/')
     await page.waitForSelector('h1')
 
+    await openSettings(page)
     await page.getByRole('button', { name: 'Switch to dark mode' }).click()
 
     const stored = await page.evaluate(() => localStorage.getItem('newsflow_theme'))
@@ -180,6 +195,7 @@ test.describe('US3 — persistent preference', () => {
     await page.goto('/')
     await page.waitForSelector('h1')
 
+    await openSettings(page)
     await page.getByRole('button', { name: 'Switch to dark mode' }).click()
     await page.getByRole('button', { name: 'Switch to light mode' }).click()
 
@@ -194,8 +210,11 @@ test.describe('US3 — persistent preference', () => {
     await page.goto('/')
     await page.waitForSelector('h1')
 
-    // Toggle to light — writes 'light' to localStorage
+    // Toggle to light via Settings
+    await openSettings(page)
     await page.getByRole('button', { name: 'Switch to light mode' }).click()
+    await page.getByRole('button', { name: 'Close settings' }).click()
+
     let hasDark = await page.evaluate(() =>
       document.documentElement.classList.contains('dark')
     )

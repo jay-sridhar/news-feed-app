@@ -101,8 +101,9 @@ npm run test:report  # Open last HTML test report
 - **Scroll position not reset on tab switch**: IntersectionObserver sentinel fires immediately after tab switch because scroll position was retained. Fixed by `window.scrollTo({ top: 0, behavior: 'instant' })` in `FeedContainer` on `activeCategory` change.
 
 ## Recent Changes
-- 005-24h-filter: Added TypeScript 5.x (strict mode) + None new — uses native `Date` API only
 
+- `006-settings-categories`: Settings screen — SettingsScreen, category toggles (localStorage), enabledCategories in CategoryContext, gear icon in TabBar, dark mode toggle moved to Settings
+- `005-24h-filter`: 24-hour freshness filter — `isRecent()` utility, filter in `useFeed`, "No recent articles" empty state
 - `004-dark-mode`: System-aware dark mode — ThemeContext, no-flash inline script, `darkMode: 'class'`, `dark:` classes across all components, toggle button in TabBar
 - `003-bookmarks`: Bookmark toggle on every article — BookmarkContext (localStorage), BookmarksContainer, NewsCard restructure (sibling button), ActiveTab type, Bookmarks tab in TabBar
 

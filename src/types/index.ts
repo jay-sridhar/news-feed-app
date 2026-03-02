@@ -31,6 +31,11 @@ export interface FeedState {
 export interface CategoryContextValue {
   activeCategory: ActiveTab
   setActiveCategory: (id: ActiveTab) => void
+  enabledCategories: CategoryId[]
+  toggleCategory: (id: CategoryId) => void
+  isSettingsOpen: boolean
+  openSettings: () => void
+  closeSettings: () => void
 }
 
 export type ActiveTab = CategoryId | 'bookmarks'
