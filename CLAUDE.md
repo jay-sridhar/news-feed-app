@@ -10,6 +10,7 @@ Auto-generated from feature plan `001-newsflow-feed`. Last updated: 2026-03-01
 - **State**: React Context + built-in hooks only
 - **RSS Parsing**: `rss-parser` — use `parser.parseString(xml)` not `parseURL()`
 - **Date/Time**: `date-fns` — `formatDistanceToNow` for relative timestamps
+- **Auth/Sync**: `firebase@^10` modular SDK — `firebase/auth` (Google sign-in) + `firebase/firestore` (cloud sync)
 - **Deployment**: Vercel free tier (static, `vite build` → `dist/`)
 
 ## Project Structure
@@ -23,8 +24,10 @@ src/
 ├── constants/
 │   ├── categories.ts              # Category[] with feedUrls
 │   └── feed.ts                    # PAGE_SIZE, REFRESH_INTERVAL_MS, ALLORIGINS_BASE
-├── context/CategoryContext.tsx    # Active category + tab navigation (ActiveTab)
-├── context/BookmarkContext.tsx    # Bookmarks state — BookmarkProvider, useBookmarkContext, localStorage
+├── context/AuthContext.tsx        # AuthProvider — user, authLoading, signInWithGoogle, signOut; window.__MOCK_AUTH_USER__ for Playwright
+├── context/CategoryContext.tsx    # Active category + tab navigation (ActiveTab); Firestore prefs sync when signed in
+├── context/BookmarkContext.tsx    # Bookmarks state — Firestore onSnapshot + dual-write when signed in; localStorage fallback
+├── services/firebase.ts           # Firebase init (null-safe when VITE_FIREBASE_* env vars missing)
 ├── hooks/
 │   ├── useFeed.ts                 # RSS fetch, FeedState, auto-refresh, AbortController
 │   └── useIntersectionObserver.ts # Scroll sentinel hook
@@ -84,10 +87,11 @@ npm run test:report  # Open last HTML test report
 
 - **Framework**: Playwright (`@playwright/test`) — Chromium only, 390×844 viewport (iPhone 14)
 - **Config**: `playwright.config.ts` — `webServer` auto-starts `npm run dev`, 30s timeout
-- **Test files**: `tests/e2e/` — `app.spec.ts` (US1), `tabs.spec.ts` (US2), `scroll.spec.ts` (US4), `error.spec.ts` (error handling), `search.spec.ts` (search), `bookmarks.spec.ts` (bookmarks), `darkmode.spec.ts` (dark mode)
+- **Test files**: `tests/e2e/` — `app.spec.ts` (US1), `tabs.spec.ts` (US2), `scroll.spec.ts` (US4), `error.spec.ts` (error handling), `search.spec.ts` (search), `bookmarks.spec.ts` (bookmarks), `darkmode.spec.ts` (dark mode), `auth.spec.ts` (auth/sync)
 - **Helpers**: `tests/helpers/mockRss.ts` — `buildRssXml`, `allOriginsEnvelope`, `mockFeed`, `mockFeedError`, `makeArticles`
 - **Route interception**: `page.route('**/allorigins/get**', ...)` — intercepts at browser level before Vite proxy
-- **Coverage**: 73 tests, all passing
+- **Auth mock injection**: `page.addInitScript` sets `window.__MOCK_AUTH_USER__` (DEV mode only) to simulate signed-in state without real Firebase credentials
+- **Coverage**: 101 tests, all passing
 
 ### Known gotchas for tests
 - React 18 Strict Mode double-invokes `useEffect` in dev → route mocks that simulate failure must fail for the first **2** calls (`callCount <= 2`), not just 1
@@ -102,10 +106,9 @@ npm run test:report  # Open last HTML test report
 
 ## Recent Changes
 
+- `007-google-auth-sync`: Google Sign-In + Firebase cloud sync — `AuthContext`, `src/services/firebase.ts` (null-safe when env vars absent), `BookmarkContext` Firestore `onSnapshot` dual-write + first-sign-in `writeBatch` merge, `CategoryContext`/`ThemeContext` preference sync, SettingsScreen Account section; `AuthProvider` is now outermost (wraps ThemeProvider + BookmarkProvider + CategoryProvider)
 - `006-settings-categories`: Settings screen — SettingsScreen, category toggles (localStorage), enabledCategories in CategoryContext, gear icon in TabBar, dark mode toggle moved to Settings
 - `005-24h-filter`: 24-hour freshness filter — `isRecent()` utility, filter in `useFeed`, "No recent articles" empty state
-- `004-dark-mode`: System-aware dark mode — ThemeContext, no-flash inline script, `darkMode: 'class'`, `dark:` classes across all components, toggle button in TabBar
-- `003-bookmarks`: Bookmark toggle on every article — BookmarkContext (localStorage), BookmarksContainer, NewsCard restructure (sibling button), ActiveTab type, Bookmarks tab in TabBar
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

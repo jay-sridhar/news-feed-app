@@ -1,4 +1,5 @@
 import { ThemeProvider } from './context/ThemeContext'
+import { AuthProvider } from './context/AuthContext'
 import { CategoryProvider, useCategoryContext } from './context/CategoryContext'
 import { BookmarkProvider } from './context/BookmarkContext'
 import { TabBar } from './components/TabBar/TabBar'
@@ -14,17 +15,19 @@ function MainView(): JSX.Element {
 
 export default function App(): JSX.Element {
   return (
-    <ThemeProvider>
-      <BookmarkProvider>
-        <CategoryProvider>
-          <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
-            <TabBar />
-            <main className="flex-1">
-              <MainView />
-            </main>
-          </div>
-        </CategoryProvider>
-      </BookmarkProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <BookmarkProvider>
+          <CategoryProvider>
+            <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
+              <TabBar />
+              <main className="flex-1">
+                <MainView />
+              </main>
+            </div>
+          </CategoryProvider>
+        </BookmarkProvider>
+      </ThemeProvider>
+    </AuthProvider>
   )
 }

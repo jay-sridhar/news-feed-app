@@ -43,3 +43,22 @@ export type ActiveTab = CategoryId | 'bookmarks'
 export interface BookmarkedArticle extends NewsArticle {
   savedAt: number  // Unix timestamp (ms) — Date.now() at time of bookmarking
 }
+
+export interface UserProfile {
+  uid: string
+  displayName: string
+  email: string
+  photoURL: string | null
+}
+
+export interface AuthContextValue {
+  user: UserProfile | null
+  authLoading: boolean
+  signInWithGoogle: () => Promise<void>
+  signOut: () => Promise<void>
+}
+
+export interface CloudPreferences {
+  enabledCategories: CategoryId[]
+  theme: Theme
+}
