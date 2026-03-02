@@ -10,7 +10,7 @@ import { mockFeed, makeArticles } from '../helpers/mockRss'
 // ---------------------------------------------------------------------------
 
 const ALL_CATEGORY_IDS = [
-  'top', 'national', 'regional', 'tech', 'ai', 'softwaredev', 'business', 'weather', 'sports',
+  'top', 'national', 'international', 'regional', 'tech', 'ai', 'softwaredev', 'business', 'weather', 'sports',
   'science', 'education', 'showbiz', 'literature', 'religion',
 ]
 
@@ -73,6 +73,7 @@ test.describe('US1 — Select My Categories', () => {
     for (const label of [
       'Top Stories',
       'National – India',
+      'International',
       'Regional – Tamil Nadu',
       'Technology',
       'Artificial Intelligence',
@@ -119,6 +120,7 @@ test.describe('US1 — Select My Categories', () => {
     // Disable all but one — leave only Top Stories
     for (const label of [
       'National – India',
+      'International',
       'Regional – Tamil Nadu',
       'Technology',
       'Artificial Intelligence',

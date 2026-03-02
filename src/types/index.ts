@@ -1,6 +1,7 @@
 export type CategoryId =
   | 'top'
   | 'national'
+  | 'international'
   | 'regional'
   | 'tech'
   | 'ai'
