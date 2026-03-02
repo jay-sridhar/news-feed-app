@@ -7,21 +7,16 @@ type RssItem = {
   link?: string
   pubDate?: string
   guid?: string
+  contentSnippet?: string
   source?: {
     $?: { url?: string }
     _?: string
-  }
-  mediaContent?: {
-    $?: { url?: string; medium?: string }
   }
 }
 
 const parser = new Parser<Record<string, unknown>, RssItem>({
   customFields: {
-    item: [
-      ['source', 'source', { keepArray: false }],
-      ['media:content', 'mediaContent', { keepArray: false }],
-    ],
+    item: [['source', 'source', { keepArray: false }]],
   },
 })
 
@@ -30,11 +25,9 @@ export function buildProxyUrl(rssUrl: string): string {
 }
 
 function extractSourceName(item: RssItem): string {
-  // Prefer the <source> element text content
   if (item.source?._) {
     return item.source._.trim()
   }
-  // Fall back: extract "- Source Name" suffix from title
   const title = item.title ?? ''
   const dashIdx = title.lastIndexOf(' - ')
   if (dashIdx !== -1) {
@@ -46,12 +39,21 @@ function extractSourceName(item: RssItem): string {
 
 function extractTitle(item: RssItem, sourceName: string): string {
   const raw = item.title ?? ''
-  // Strip the " - Source Name" suffix if it matches
   const suffix = ` - ${sourceName}`
   if (raw.endsWith(suffix)) {
     return raw.slice(0, raw.length - suffix.length).trim()
   }
   return raw.trim()
+}
+
+function extractSnippet(item: RssItem): string | undefined {
+  const raw = (item.contentSnippet ?? '').trim()
+  if (!raw) return undefined
+
+  // contentSnippet lines: line 0 is the main headline (mirrors title), lines 1+ are related articles
+  const lines = raw.split('\n').map((l) => l.trim()).filter(Boolean)
+  const rest = lines.slice(1, 3)
+  return rest.length > 0 ? rest.join(' • ') : undefined
 }
 
 export function parseRssItem(item: RssItem, categoryId: CategoryId): NewsArticle {
@@ -62,18 +64,9 @@ export function parseRssItem(item: RssItem, categoryId: CategoryId): NewsArticle
   const id = link
     ? encodeURIComponent(link).slice(0, 100)
     : `${categoryId}-${pubDate}-${title.slice(0, 20)}`
+  const snippet = extractSnippet(item)
 
-  const mediaUrl = item.mediaContent?.$?.url
-  const mediaMedium = item.mediaContent?.$?.medium
-  const imageUrl = mediaUrl && mediaUrl.length > 0 ? mediaUrl : undefined
-  const imageType: 'image' | 'video' | undefined =
-    imageUrl !== undefined
-      ? mediaMedium === 'video'
-        ? 'video'
-        : 'image'
-      : undefined
-
-  return { id, title, link, pubDate, sourceName, categoryId, imageUrl, imageType }
+  return { id, title, link, pubDate, sourceName, categoryId, snippet }
 }
 
 export async function fetchFeed(
@@ -98,11 +91,6 @@ export async function fetchFeed(
 
   if (!feed.items || feed.items.length === 0) {
     return []
-  }
-
-  // TEMP: log first item to inspect available fields
-  if (feed.items.length > 0) {
-    console.log('[rssService] first raw item:', JSON.stringify(feed.items[0], null, 2))
   }
 
   return feed.items.map((item) => parseRssItem(item, category.id))

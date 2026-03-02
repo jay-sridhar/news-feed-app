@@ -36,8 +36,7 @@ export interface NewsArticle {
   pubDate: string
   sourceName: string
   categoryId: CategoryId
-  imageUrl?: string
-  imageType?: 'image' | 'video'
+  snippet?: string
 }
 
 export type FeedStatus = 'idle' | 'loading' | 'success' | 'error'
