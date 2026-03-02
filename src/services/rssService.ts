@@ -100,5 +100,10 @@ export async function fetchFeed(
     return []
   }
 
+  // TEMP: log first item to inspect available fields
+  if (feed.items.length > 0) {
+    console.log('[rssService] first raw item:', JSON.stringify(feed.items[0], null, 2))
+  }
+
   return feed.items.map((item) => parseRssItem(item, category.id))
 }
