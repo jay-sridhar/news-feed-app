@@ -6,4 +6,4 @@ export const REFRESH_INTERVAL_MS = 10 * 60 * 1000
 
 export const ALLORIGINS_BASE = import.meta.env.DEV
   ? '/allorigins'
-  : 'https://api.allorigins.win'
+  : '/api'
