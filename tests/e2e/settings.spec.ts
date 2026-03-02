@@ -10,7 +10,7 @@ import { mockFeed, makeArticles } from '../helpers/mockRss'
 // ---------------------------------------------------------------------------
 
 const ALL_CATEGORY_IDS = [
-  'top', 'national', 'international', 'regional', 'tech', 'ai', 'softwaredev', 'business', 'weather', 'sports',
+  'top', 'national', 'international', 'regional', 'tech', 'ai', 'business', 'weather', 'sports',
   'science', 'education', 'showbiz', 'literature', 'religion',
 ]
 
@@ -77,7 +77,6 @@ test.describe('US1 — Select My Categories', () => {
       'Regional – Tamil Nadu',
       'Technology',
       'Artificial Intelligence',
-      'Software & Jobs',
       'Business & Stocks',
       'Weather',
       'Sports',
@@ -124,7 +123,6 @@ test.describe('US1 — Select My Categories', () => {
       'Regional – Tamil Nadu',
       'Technology',
       'Artificial Intelligence',
-      'Software & Jobs',
       'Business & Stocks',
       'Weather',
       'Sports',

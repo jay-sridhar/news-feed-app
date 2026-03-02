@@ -1,10 +1,10 @@
 # NewsFlow
 
-A mobile-first Indian news feed app by **Jay Sridhar** — 15 configurable RSS categories, real-time search, bookmarks, dark mode, and optional Google cloud sync.
+A mobile-first Indian news feed app by **Jay Sridhar** — 14 configurable RSS categories, real-time search, bookmarks, dark mode, and optional Google cloud sync.
 
 ## Features
 
-- **15 configurable categories** — Top Stories, National, International, Regional (state-aware), Technology, AI, Software & Jobs, Business & Stocks, Weather, Sports, Science, Education, Media & Show-Biz, Literature, Religion
+- **14 configurable categories** — Top Stories, National, International, Regional (state-aware), Technology, AI, Business & Stocks, Weather, Sports, Science, Education, Media & Show-Biz, Literature, Religion
 - **Region picker** — select your state; Regional and National feeds update automatically
 - **Freshness filter** — show articles from last 6 h / 12 h / 24 h (default) / 48 h / 7 days / all time
 - **Article snippets** — related headline preview shown below each card

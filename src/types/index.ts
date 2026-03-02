@@ -5,7 +5,6 @@ export type CategoryId =
   | 'regional'
   | 'tech'
   | 'ai'
-  | 'softwaredev'
   | 'business'
   | 'weather'
   | 'sports'

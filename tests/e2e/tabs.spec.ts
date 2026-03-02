@@ -15,7 +15,7 @@ const CATEGORY_LABELS = [
 ]
 
 const ALL_CATEGORY_IDS = [
-  'top', 'national', 'international', 'regional', 'tech', 'ai', 'softwaredev', 'business', 'weather', 'sports',
+  'top', 'national', 'international', 'regional', 'tech', 'ai', 'business', 'weather', 'sports',
   'science', 'education', 'showbiz', 'literature', 'religion',
 ]
 
