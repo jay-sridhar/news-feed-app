@@ -76,11 +76,14 @@ export async function mockFeedError(page: Page): Promise<void> {
   })
 }
 
-/** Builds a standard set of N articles with predictable titles. */
-export function makeArticles(count: number, prefix = 'Article'): MockArticle[] {
+/** Builds a standard set of N articles with predictable titles.
+ *  Pass pubDateOverride to fix every article's pubDate (e.g. for freshness tests).
+ */
+export function makeArticles(count: number, prefix = 'Article', pubDateOverride?: string): MockArticle[] {
   return Array.from({ length: count }, (_, i) => ({
     title: `${prefix} ${i + 1}`,
     source: `Source ${i + 1}`,
     link: `https://example.com/article-${i + 1}`,
+    ...(pubDateOverride !== undefined ? { pubDate: pubDateOverride } : {}),
   }))
 }

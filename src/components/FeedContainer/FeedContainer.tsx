@@ -49,12 +49,11 @@ export function FeedContainer(): JSX.Element {
     )
   }
 
-  if (articles.length === 0) {
+  if (status === 'success' && allArticles.length === 0) {
     return (
-      <ErrorState
-        message="No articles found. Tap to retry."
-        onRetry={retry}
-      />
+      <p className="px-4 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
+        No recent articles. Check back later.
+      </p>
     )
   }
 
