@@ -60,8 +60,8 @@ test.describe('Error handling', () => {
 
     await page.goto('/')
 
-    // Should show an error/retry state, not a white blank screen
-    await expect(page.getByRole('button', { name: /retry/i })).toBeVisible({ timeout: 10_000 })
+    // Should show the empty-state message, not a white blank screen or loading spinner
+    await expect(page.getByText('No recent articles. Check back later.')).toBeVisible({ timeout: 10_000 })
     // Body should have content (not empty)
     const bodyText = await page.locator('body').innerText()
     expect(bodyText.length).toBeGreaterThan(10)
