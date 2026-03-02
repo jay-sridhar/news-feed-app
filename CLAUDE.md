@@ -101,10 +101,10 @@ npm run test:report  # Open last HTML test report
 - **Scroll position not reset on tab switch**: IntersectionObserver sentinel fires immediately after tab switch because scroll position was retained. Fixed by `window.scrollTo({ top: 0, behavior: 'instant' })` in `FeedContainer` on `activeCategory` change.
 
 ## Recent Changes
+- 006-settings-categories: Added TypeScript 5.x (strict mode) + React 18, Vite 5, Tailwind CSS 3 — no new dependencies
 
 - `004-dark-mode`: System-aware dark mode — ThemeContext, no-flash inline script, `darkMode: 'class'`, `dark:` classes across all components, toggle button in TabBar
 - `003-bookmarks`: Bookmark toggle on every article — BookmarkContext (localStorage), BookmarksContainer, NewsCard restructure (sibling button), ActiveTab type, Bookmarks tab in TabBar
-- `002-search-filter`: In-feed keyword search — SearchBar component, `allArticles` exposed from `useFeed`, client-side filter in FeedContainer
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

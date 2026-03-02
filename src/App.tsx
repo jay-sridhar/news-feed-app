@@ -4,9 +4,11 @@ import { BookmarkProvider } from './context/BookmarkContext'
 import { TabBar } from './components/TabBar/TabBar'
 import { FeedContainer } from './components/FeedContainer/FeedContainer'
 import { BookmarksContainer } from './components/BookmarksContainer/BookmarksContainer'
+import { SettingsScreen } from './components/SettingsScreen/SettingsScreen'
 
 function MainView(): JSX.Element {
-  const { activeCategory } = useCategoryContext()
+  const { activeCategory, isSettingsOpen } = useCategoryContext()
+  if (isSettingsOpen) return <SettingsScreen />
   return activeCategory === 'bookmarks' ? <BookmarksContainer /> : <FeedContainer />
 }
 
